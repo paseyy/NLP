@@ -69,13 +69,29 @@ class NLPLInterpreter:
             case "BREAK":
                 raise BreakException
 
-            # Builtin functions
-            case "PUSH":
+            case "IF":
+                if self.stack.pop():
+                    self.interpretBody(statement.body)
+
+            # Logic functions
+            case "TLZ":
+                self.stack.tlz()
+
+            case "TEQ":
+                self.stack.teq()
+
+            # Stack manipulation
+            case "NUMBER":
                 self.stack.push(len(statement.value))
+            case "STRING":
+                self.stack.push(statement.value)
 
             # Function calls
             case "CALL":
                 self.interpretFunctionCall(statement)
+
             # IO
             case "PRINT":
-                print(chr(round(self.stack.pop())), end="")
+                print(self.stack.pop(), end="")
+            case "TO_CHAR":
+                self.stack.push(chr(round(self.stack.pop())))

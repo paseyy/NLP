@@ -17,8 +17,8 @@ if __name__ == "__main__":
     try:
         tokens = lexer.tokenize(program)
 
-        #for tok in tokens:
-        #    print(tok)
+        # for tok in tokens:
+        #     print(tok)
 
         parseTree = parser.parse(tokens)
         interpreter.interpret(parseTree)

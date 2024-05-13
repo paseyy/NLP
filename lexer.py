@@ -8,7 +8,8 @@ class NLPLLexer(Lexer):
         BEGIN_DEF,
         END_DEF,
         # Stack manipulation
-        PUSH,
+        NUMBER,
+        STRING,
         # Control flow
         BEGIN_WHILE,
         END_WHILE,
@@ -22,6 +23,7 @@ class NLPLLexer(Lexer):
         CALL,
         # IO
         PRINT,
+        TO_CHAR,
         # Misc
         ENDL
     }
@@ -33,34 +35,37 @@ class NLPLLexer(Lexer):
     ignore  = "\t"
 
     # Function definition
-    BEGIN_DEF   = r"\*+A\s+[a-zA-Z]{2,}\s+dipped\s+in\s+Mama\s+Liz's\s+"
-    END_DEF     = r"\s*oil\s*\?+"
+    BEGIN_DEF   = r" +A\s+[a-zA-Z]{2,}\s+dipped\s+in\s+Mama\s+Liz's\s+"
+    END_DEF     = r"\s*oil"
 
     # Stack manipulation
-    PUSH    = r"\s*An?\s+[a-zA-Z]+"
+    NUMBER      = r" *An?\s+[a-zA-Z]+"
+    STRING      = r" *You\s+guys\s+[ever\s+]?hear\s+about\s+[a-zA-Z0-9]+"
 
     # Control flow
-    BEGIN_WHILE = r"\s*Run\s+it\s+back"
-    END_WHILE   = r"\s*I\s+got\s+one\s+more\s+in\s+me"
-    BREAK       = r"\s*GET\s+ME\s+(OUTTA|OUT\s+OF)\s+HERE\s*(\!+)?"
-    TLZ         = r"\s*The\s+(reports\s+of|rumors\s+about)\s+my\s+(demise|death)\s+" \
+    BEGIN_WHILE = r" *Run\s+it\s+back"
+    END_WHILE   = r" *I\s+got\s+one\s+more\s+in\s+me"
+    BREAK       = r" *GET\s+ME\s+(OUTTA|OUT\s+OF)\s+HERE"
+    TLZ         = r" *The\s+(reports|rumors)\s+(of|about)\s+my\s+(demise|death)\s+" \
                   r"have\s+been\s+greatly\s+exaggerated"
-    TEQ         = r"\s*Him\s+me\s+him\s+him\s+me"
-    BEGIN_IF    = r"\s*Nuts\s+on\s+the\s+table"
-    END_IF      = r"\s*Nuts\s+off\s+the\s+table"
+    TEQ         = r" *Him\s+me\s+him\s+him\s+me"
+    BEGIN_IF    = r" *Nuts\s+on\s+the\s+table"
+    END_IF      = r" *Nuts\s+off\s+the\s+table"
+
     # Functions/builtin calls
-    CALL    = r"\s*[a-zA-Z]{2,}\s+me"
+    CALL        = r" *[a-zA-Z]{2,}\s+me"
 
     # IO
-    PRINT   = r"\s*(Librarian\s*,\s+pull\s+that\s+(shit\s+)?up)|(Pull\s+that\s+shit\s+up)"
+    TO_CHAR     = r" *Write\s+that\s+down"
+    PRINT       = r" *(Librarian\s*,\s+p|P)ull\s+that\s+(shit\s+)?up"
 
     # Misc
-    ENDL    = r"\s*\.[ \t]*"
+    ENDL        = r"\s*[\!\?\.]+[ \t]*"
 
 
     # Preprocess nodes
-    def PUSH(self, t):
-        t.value = t.value[2:].strip().replace(" ", "")
+    def NUMBER(self, t):
+        t.value = t.value.strip()[2:].replace(" ", "")
         return t
 
     def BEGIN_DEF(self, t):
@@ -69,6 +74,10 @@ class NLPLLexer(Lexer):
 
     def CALL(self, t):
         t.value = t.value.strip().split(" ")[0]
+        return t
+
+    def STRING(self, t):
+        t.value = t.value.split("about")[-1].strip()
         return t
 
     # remove statement separators

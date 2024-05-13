@@ -41,9 +41,15 @@ class While(Statement):
         self.body = body
 
 
+class If(Statement):
+    def __init__(self, type, body):
+        super().__init__(type),
+        self.body = body
+
+
 class NLPLParser(Parser):
     # Uncomment this line to enable syntax debugging
-    debugfile = "parser.out"
+    # debugfile = "parser.out"
 
     # Get the token list from the lexer (required)
     tokens = NLPLLexer.tokens
@@ -79,9 +85,15 @@ class NLPLParser(Parser):
 
 
     # Stack manipulation
-    @_("PUSH")
+    @_("NUMBER")
     def statement(self, p):
-        return Push("PUSH", p.PUSH)
+        return Push("NUMBER", p.NUMBER)
+
+    @_("STRING")
+    def statement(self, p):
+        return Push("STRING", p.STRING)
+
+
 
     # Control flow
     @_("BEGIN_WHILE statement_list END_WHILE")
@@ -91,6 +103,18 @@ class NLPLParser(Parser):
     @_("BREAK")
     def statement(self, p):
         return Statement("BREAK")
+
+    @_("TLZ")
+    def statement(self, p):
+        return Statement("TLZ")
+
+    @_("TEQ")
+    def statement(self, p):
+        return Statement("TEQ")
+
+    @_("BEGIN_IF statement_list END_IF")
+    def statement(self, p):
+        return If("IF", p.statement_list)
 
 
     # Function/builtin calls
@@ -103,6 +127,11 @@ class NLPLParser(Parser):
     @_("PRINT")
     def statement(self, p):
         return Statement("PRINT")
+
+    @_("TO_CHAR")
+    def statement(self, p):
+        return Statement("TO_CHAR")
+
 
 
     # Misc

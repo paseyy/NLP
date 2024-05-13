@@ -25,7 +25,9 @@ class Stack:
         self.push(t2)
 
     def add(self):
-        self.push(self.pop() + self.pop())
+        t1 = self.pop()
+        t2 = self.pop()
+        self.push(t2 + t1)
 
     def sub(self):
         t1 = self.pop()
@@ -40,6 +42,14 @@ class Stack:
         t2 = self.pop()
         self.push(t2 / t1)
 
+    def tlz(self):
+        t1 = self.pop()
+        self.push(t1 < 0)
+
+    def teq(self):
+        t1 = self.pop()
+        t2 = self.pop()
+        self.push(t1 == t2)
 
 
 
