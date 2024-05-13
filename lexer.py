@@ -9,13 +9,16 @@ class NLPLLexer(Lexer):
         END_DEF,
         # Stack manipulation
         PUSH,
-        POP,
-        SWAP,
-        # Operators
-        ADD,
-        SUB,
-        MUL,
-        DIV,
+        # Control flow
+        BEGIN_WHILE,
+        END_WHILE,
+        BREAK,
+        TLZ,
+        TEQ,
+        BEGIN_IF,
+        END_IF,
+        # Function/builtin calls
+        # handled as builtin functions: ADD, SUB, MUL, DIV, POP, DUP, SWAP
         CALL,
         # IO
         PRINT,
@@ -30,23 +33,26 @@ class NLPLLexer(Lexer):
     ignore  = "\t"
 
     # Function definition
-    BEGIN_DEF   = r"A\s+[a-zA-Z]{2,}\s+dipped\s+in\s+Mama\s+Liz's\s+"
+    BEGIN_DEF   = r"\*+A\s+[a-zA-Z]{2,}\s+dipped\s+in\s+Mama\s+Liz's\s+"
     END_DEF     = r"\s*oil\s*\?+"
 
     # Stack manipulation
-    PUSH    = r"An?\s+[a-zA-Z]{2,}"
-    POP     = r"Ice\s+me."
-    SWAP    = r"Swap\s+me"
+    PUSH    = r"\s*An?\s+[a-zA-Z]+"
 
-    # Operators
-    ADD     = r"Buy\s+me"
-    SUB     = r"Sell\s+me"
-    MUL     = r"Juice\s+me"
-    DIV     = r"Squeeze\s+me"
-    CALL    = r"[a-zA-Z]{2,}\s+me"
+    # Control flow
+    BEGIN_WHILE = r"\s*Run\s+it\s+back"
+    END_WHILE   = r"\s*I\s+got\s+one\s+more\s+in\s+me"
+    BREAK       = r"\s*GET\s+ME\s+(OUTTA|OUT\s+OF)\s+HERE\s*(\!+)?"
+    TLZ         = r"\s*The\s+(reports\s+of|rumors\s+about)\s+my\s+(demise|death)\s+" \
+                  r"have\s+been\s+greatly\s+exaggerated"
+    TEQ         = r"\s*Him\s+me\s+him\s+him\s+me"
+    BEGIN_IF    = r"\s*Nuts\s+on\s+the\s+table"
+    END_IF      = r"\s*Nuts\s+off\s+the\s+table"
+    # Functions/builtin calls
+    CALL    = r"\s*[a-zA-Z]{2,}\s+me"
 
     # IO
-    PRINT   = r"(Librarian\s*,\s+pull\s+that\s+(shit\s+)?up)|(Pull\s+that\s+shit\s+up)"
+    PRINT   = r"\s*(Librarian\s*,\s+pull\s+that\s+(shit\s+)?up)|(Pull\s+that\s+shit\s+up)"
 
     # Misc
     ENDL    = r"\s*\.[ \t]*"
@@ -54,7 +60,7 @@ class NLPLLexer(Lexer):
 
     # Preprocess nodes
     def PUSH(self, t):
-        t.value = t.value[2:].replace(" ", "")
+        t.value = t.value[2:].strip().replace(" ", "")
         return t
 
     def BEGIN_DEF(self, t):
@@ -62,7 +68,7 @@ class NLPLLexer(Lexer):
         return t
 
     def CALL(self, t):
-        t.value = t.value.split(" ")[0]
+        t.value = t.value.strip().split(" ")[0]
         return t
 
     # remove statement separators

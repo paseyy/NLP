@@ -1,5 +1,6 @@
 from lexer import NLPLLexer
 from parser import NLPLParser
+from interpreter import NLPLInterpreter
 import sys
 
 if __name__ == "__main__":
@@ -7,12 +8,11 @@ if __name__ == "__main__":
         program_file = open(sys.argv[1], "r")
         program = program_file.read()
     except Exception:
-        program = "A vagabond dipped in Mama Liz's Juice me oil???" \
-                  "A hemomancer. A donkey. vagabond me." \
-                  "Librarian, pull that up."
+        program = open("tests/loops.nlp", "r").read()
 
     lexer = NLPLLexer()
     parser = NLPLParser()
+    interpreter = NLPLInterpreter()
 
     try:
         tokens = lexer.tokenize(program)
@@ -20,7 +20,9 @@ if __name__ == "__main__":
         #for tok in tokens:
         #    print(tok)
 
-        parser.parse(tokens)
+        parseTree = parser.parse(tokens)
+        interpreter.interpret(parseTree)
+
     except EOFError:
         pass
     except Exception as e:

@@ -1,10 +1,16 @@
 from sly import Parser
 from lexer import NLPLLexer
-from stack import Stack
 
-stack = Stack()
-fenv = {}
-log = open("parser.log", "w+")
+
+class Definition:
+    def __init__(self, name, body):
+        self.name = name,
+        self.body = body
+
+
+class DefinitionList:
+    def __init__(self, definitions):
+        self.definitions = definitions
 
 
 class Statement:
@@ -12,9 +18,26 @@ class Statement:
         self.type = type
 
 
-class Definition:
-    def __init__(self, name, body):
-        self.name = name,
+class StatementList:
+    def __init__(self, statements):
+        self.statements = statements
+
+
+class Call(Statement):
+    def __init__(self, type, name):
+        super().__init__(type),
+        self.name = name
+
+
+class Push(Statement):
+    def __init__(self, type, value):
+        super().__init__(type),
+        self.value = value
+
+
+class While(Statement):
+    def __init__(self, type, body):
+        super().__init__(type),
         self.body = body
 
 
@@ -28,97 +51,67 @@ class NLPLParser(Parser):
     '''Grammar rules and actions'''
     @_("definition_list statement_list")
     def program(self, p):
-        print("program")
-        return p.statement_list, p.definition_list
+        return DefinitionList(p[0]), StatementList(p[1])
 
 
     # Function definitions
     @_("definition definition_list")
     def definition_list(self, p):
-        print("definition")
-        return p.definition, p.definition_list
+        return [p.definition] + p.definition_list
 
     @_("empty")
     def definition_list(self, p):
-        print("list")
-        pass
+        return []
 
-    @_("BEGIN_DEF statement END_DEF")
+    @_("BEGIN_DEF statement_list END_DEF")
     def definition(self, p):
-        print("definition " + p.BEGIN_DEF)
-        fenv[p.BEGIN_DEF] = p.statement
+        return Definition(p.BEGIN_DEF, p.statement_list)
 
 
     # Statements
     @_("statement statement_list")
     def statement_list(self, p):
-        return p.statement, p.statement_list
+        return [p.statement] + p.statement_list
 
     @_("empty")
     def statement_list(self, p):
-        pass
+        return []
 
 
     # Stack manipulation
     @_("PUSH")
     def statement(self, p):
-        stack.push(len(p.PUSH))
-        return p.statement
+        return Push("PUSH", p.PUSH)
 
-    @_("POP")
+    # Control flow
+    @_("BEGIN_WHILE statement_list END_WHILE")
     def statement(self, p):
-        stack.pop()
-        return p.statement
+        return While("WHILE", p.statement_list)
 
-    @_("SWAP")
+    @_("BREAK")
     def statement(self, p):
-        stack.swap()
-        return p.statement
+        return Statement("BREAK")
 
 
-    # Operators
-    @_("ADD")
-    def statement(self, p):
-        stack.push(stack.pop() + stack.pop())
-        return p.statement
-
-    @_("SUB")
-    def statement(self, p):
-        top1 = stack.pop()
-        top2 = stack.pop()
-        stack.push(top2 - top1)
-        return p.statement
-
-    @_("MUL")
-    def statement(self, p):
-        print("mul")
-        stack.push(stack.pop() * stack.pop())
-        return p.statement
-
-    @_("DIV")
-    def statement(self, p):
-        top1 = stack.pop()
-        top2 = stack.pop()
-        stack.push(top2 / top1)
-        return p.statement
-
+    # Function/builtin calls
     @_("CALL")
     def statement(self, p):
-        return fenv[p.CALL], p.statement
+        return Call("CALL", p.CALL)
 
 
     # IO
     @_("PRINT")
     def statement(self, p):
-        print("Print")
-        print(chr(round(stack.top())), end="")
-        return p.statement
+        return Statement("PRINT")
+
 
     # Misc
     @_("ENDL")
     def statement(self, p):
         pass
 
+
+    # Empty rule
     @_("")
     def empty(self, p):
         pass
